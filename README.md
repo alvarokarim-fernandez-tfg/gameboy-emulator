@@ -17,7 +17,7 @@ Pokemon|Tetris
 ## Supported features in the current version
 | Component | CPU | PPU | Joypad | Screen | Timers | Interrupts | DMA | MBC1 | MBC2 | MBC3 | MBC5 | Serial | APU |
 |-----------|-----|-----|--------|--------|--------|------------|-----|------|------|------|------|-----|-----|
-| Supported | ✅  | ✅   | ✅     | ✅     | ✅     | ✅          | ✅  | ✅   | ✅    | ✅   | ❌   | ❌  | ❌   |
+| Supported | ✅  | ✅   | ✅     | ✅     | ✅     | ✅          | ✅  | ✅   | ✅    | ✅   | ✅   | ❌  | ✅   |
 
 ## Passed tests in the current version
 
