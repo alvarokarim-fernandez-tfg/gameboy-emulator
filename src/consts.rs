@@ -14,6 +14,15 @@ pub const REG_F :REGINDEX = 6;
 pub const REG_H :REGINDEX = 7;
 pub const REG_L :REGINDEX = 1;
 
+#[derive(Debug)]
+pub struct Config {
+    pub is_debug :bool,
+    pub has_breakpoint :bool,
+    pub breakpoint_addr :u16,
+    pub rom_path :String,
+    pub screen_mult: u8
+}
+
 pub enum JmpCond {
     NZ,
     Z,
@@ -28,6 +37,11 @@ pub enum Interrupt {
     Timer,  
     Serial, 
     Joypad 
+}
+
+pub trait ComponentWithMemory {
+    fn read(&self, addr: u16) -> u8;
+    fn write(&mut self, addr: u16, val: u8);
 }
 
 pub const REG_N :u8 = 8;
