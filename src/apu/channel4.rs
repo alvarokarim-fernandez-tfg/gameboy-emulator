@@ -30,51 +30,17 @@ impl Channel4 {
     }
     
     pub fn init(&mut self) {}
-    
-    pub fn read(&self, addr :u16) -> u8 {
-        return match addr {
-            ADDR_NR41 => 0xFF, // Write only,
-            ADDR_NR42 => self.nr42,
-            ADDR_NR43 => self.nr43,
-            ADDR_NR44 => self.nr44 | 0xBF,
-            _ => panic!()
-        }
-    }
-
-    pub fn write(&mut self, addr :u16, val :u8) {
-        match addr {
-            // Length timer
-            //
-            // b7-6 Unused
-            // b5-0 Initial length timer
-            ADDR_NR41 => self.nr41 = val,
-            // Volume & envelope
-            //
-            // b7-6 Initial volume
-            // b3   Env direction
-            // b2-0 Env sweep pace
-            ADDR_NR42 => self.nr42 = val,
-            // Frecuency & randomness
-            //
-            // b7-4 Clock shift
-            // b3   LSFR width
-            // b2-0 Clock divider
-            ADDR_NR43 => self.nr43 = val,
-            // Control
-            //
-            // b7   Trigger
-            // b6   Length enable
-            // b5-0 Unused
-            ADDR_NR44 => self.nr44 = val,
-            _ => panic!()
-        }
-    }
 
     pub fn trigger(&mut self) {
         self.is_enabled = true;
 
         self.env_counter = self.env_sweep_pace();
+        self.volume = self.initial_env_volume();
         self.length_timer = self.initial_length_timer();
+
+        for i in 0..15 {
+            self.lsfr[i] = false;
+        }
     }
 
     pub fn change_envelope(&mut self) {
@@ -115,15 +81,15 @@ impl Channel4 {
         }
 
         if self.period_timer == 0 {
-            let new_val = !(self.lsfr[14] ^ self.lsfr[15]);
+            let new_val = !(self.lsfr[0] ^ self.lsfr[1]);
 
             // Shift LSFR to the right
-            for i in 0..15 {
-                self.lsfr[15-i] = self.lsfr[15-i-1];
+            for i in 0..14 {
+                self.lsfr[i] = self.lsfr[i+1];
             }
 
             // Add new value to the left
-            self.lsfr[0] = new_val;
+            self.lsfr[15] = new_val;
             
             // If short-mode is selected, copy the bit to b7 as well
             if self.lfsr_width() {
@@ -175,9 +141,54 @@ impl Channel for Channel4 {
 
     fn sample(&self) -> u8 {
         return if self.lsfr[0] {
-            self.volume
+            if self.volume != 0 {
+                println!("vol: {}", self.volume);
+            }
+            self.volume*5
         } else {
+            //println!("vol: None");
             0
+        }
+    }
+}
+
+impl ComponentWithMemory for Channel4 {
+    fn read(&self, addr :u16) -> u8 {
+        return match addr {
+            ADDR_NR41 => 0xFF, // Write only,
+            ADDR_NR42 => self.nr42,
+            ADDR_NR43 => self.nr43,
+            ADDR_NR44 => self.nr44 | 0xBF,
+            _ => panic!()
+        }
+    }
+
+    fn write(&mut self, addr :u16, val :u8) {
+        match addr {
+            // Length timer
+            //
+            // b7-6 Unused
+            // b5-0 Initial length timer
+            ADDR_NR41 => self.nr41 = val,
+            // Volume & envelope
+            //
+            // b7-6 Initial volume
+            // b3   Env direction
+            // b2-0 Env sweep pace
+            ADDR_NR42 => self.nr42 = val,
+            // Frecuency & randomness
+            //
+            // b7-4 Clock shift
+            // b3   LSFR width
+            // b2-0 Clock divider
+            ADDR_NR43 => self.nr43 = val,
+            // Control
+            //
+            // b7   Trigger
+            // b6   Length enable
+            // b5-0 Unused
+            ADDR_NR44 => self.nr44 = val,
+            _ => panic!()
         }
     }
 }
