@@ -12,7 +12,7 @@ Pokemon|Tetris
 ## How to run
 
 1. Clone the repository
-2. Execute "cargo run \<ROM path\>"
+2. Run ``cargo run <ROM path>``
 
 ## Supported features in the current version
 | Component | CPU | PPU | Joypad | Screen | Timers | Interrupts | DMA | MBC1 | MBC2 | MBC3 | MBC5 | Serial | APU |
